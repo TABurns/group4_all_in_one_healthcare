@@ -10,13 +10,14 @@ from ui.config.logger_config import logger
 from ui.config.paths import STYLES
 from ui.main_window import MainWindow
 from ui.util.resize_window import size_and_center_window
+from ui.working_area import WorkingArea
 
 
 class RootApp(QApplication):
     def __init__(self) -> None:
         super().__init__([])  # --Passes cmds to application
 
-    # main_window = None  # --Root window of application
+        self.working_area = None  # ---Window to stack sub windows
 
     # --------------------------------------------------------
     # --Apply css styles
@@ -28,7 +29,11 @@ class RootApp(QApplication):
             logger.error(f"Failed to load stylesheet from {path}: {err}")
             return ""
 
+    #    def _load_secondary_windows(self) -> None:
+
     def _boot_app(self) -> None:
+        self.working_area = WorkingArea()
+
         main_window = MainWindow(self)
 
         # ---Apply stylesheet early so that widgets render properly
