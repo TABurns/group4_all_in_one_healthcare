@@ -1,4 +1,53 @@
 /* ---------------------------------------------------------
+@Setup Page
+----------------------------------------------------------*/
+QDialog#SetupDialog {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: larger;
+    background-color: white;
+    color: #2C3E50;
+    border-radius: 5px;
+
+}
+QDialogButtonBox#SetupBTN QPushButton {
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    border: 2px solid #2C3E50;
+    background-color: #ecf0f1;
+    color: #2C3E50;
+    border-radius: 4px;
+}
+
+QDialogButtonBox#SetupBTN QPushButton:hover {
+    background-color: #d0d3d4;
+    border-color: #2980b9;
+    color: #2980b9;
+}
+
+QDialogButtonBox#SetupBTN QPushButton:pressed {
+    background-color: #bdc3c7;
+    border-color: #2471a3;
+    color: #1c2833;
+}
+
+QDialog#SetupDialog QLabel {
+    color: #2C3E50;
+    font-size: 24px;
+}
+
+QPushButton#SetupBTN:hover {
+    padding-left: 17px;
+    /* Increased left padding on hover */
+}
+
+QDialog#SetupDialog QLineEdit:focus {
+    border: 1px solid #3498db;
+    background-color: #ffffff;
+    color: #2C3E50;
+}
+
+/* ---------------------------------------------------------
 @MAIN WINDOW
 ---------------------------------------------------------*/
 QMainWindow#MainWindow {
@@ -36,4 +85,23 @@ QPushButton#RootBTN {
 QPushButton#RootBTN:hover {
     padding-left: 17px;
     /* Increased left padding on hover */
+}
+
+/* ---------------------------------------------------------
+@Line Edits
+----------------------------------------------------------*/
+
+QLineEdit#LineEdit {
+    background-color: gray;
+    color: #2C3E50;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 24px;
+}
+
+QLineEdit:focus {
+    border: 1px solid #3498db;
+    background-color: #ffffff;
+    color: #2c3e50;
 }

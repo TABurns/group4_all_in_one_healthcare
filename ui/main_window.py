@@ -1,9 +1,8 @@
-# ui/main_window.py
+import logging
+import sqlite3
+from collections.abc import Callable
 
-
-from typing import TYPE_CHECKING
-
-from PySide6.QtCore import Qt
+from PySide6.QtGui import QBrush, QPalette, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QHBoxLayout,
@@ -11,15 +10,13 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QPushButton,
     QSizePolicy,
-    QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
 
-from PySide6.QtGui import QPixmap, QPalette, QBrush
+from ui.config.paths import SETUP_DB
 
-if TYPE_CHECKING:
-    from pathlib import Path
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -29,12 +26,26 @@ class MainWindow(QMainWindow):
         self.root = root  # ---Main Application
 
         # ---Window to display sub windows.
-        self.working_area = self.root.working_area
+        self.working_area = getattr(self.root, "working_area", QWidget(self))
 
         self.setObjectName("MainWindow")
-        self.setWindowTitle("Good Doctors Medical Group")
 
-        root_widget = QWidget(self, objectName="root_widget")  # ---Main widget to build on
+        company_name = "Healthcare App"
+        if SETUP_DB.exists():
+            try:
+                conn = sqlite3.connect(SETUP_DB)
+                cursor = conn.cursor()
+                cursor.execute("SELECT company_name FROM settings LIMIT 1")
+                row = cursor.fetchone()
+                if row and row[0]:
+                    company_name = row[0]
+                conn.close()
+            except Exception:
+                logger.exception("Error accessing the database")
+        self.setWindowTitle(company_name)
+
+        root_widget = QWidget(self)  # ---Main widget to build on
+        root_widget.setObjectName("root_widget")
 
         main_layout = QHBoxLayout(root_widget)
         self.setCentralWidget(root_widget)
@@ -42,21 +53,23 @@ class MainWindow(QMainWindow):
         # Set the background image programmatically
         pixmap = QPixmap("ui/resources/gooddr.png")
         palette = self.palette()
-        palette.setBrush(QPalette.Window, QBrush(pixmap))
+        palette.setBrush(QPalette.ColorRole.Window, QBrush(pixmap))
         self.setPalette(palette)
 
         # ---Widget for sidebar btns.
-        sidebar_widget: QWidget = QWidget(self, objectName="SideBarWidget")
+        sidebar_widget: QWidget = QWidget(self)
+        sidebar_widget.setObjectName("SideBarWidget")
         sidebar_layout: QVBoxLayout = QVBoxLayout(sidebar_widget)
 
         # ---Add sub window btns to sidebar
-        sidebar_layout.addStretch() # ---push buttons to center of sidebar
+        sidebar_layout.addStretch()  # ---push buttons to center of sidebar
         self._add_buttons(sidebar_layout)
 
-        sidebar_layout.addStretch() # ---Fill space between btns and footer
+        sidebar_layout.addStretch()  # ---Fill space between btns and footer
 
         # ---Footer
-        foot = QLabel("© 2025 Smart Healthcare Systems", self, objectName="Footer")
+        foot = QLabel("© 2025 Smart Healthcare Systems", self)
+        foot.setObjectName("Footer")
         sidebar_layout.addWidget(foot)
 
         main_layout.addWidget(sidebar_widget, 1)
@@ -66,17 +79,18 @@ class MainWindow(QMainWindow):
     #  / Handle Buttons
     # ******************************************************************************************
 
-    def _build_button(self, btn_label: str, function: callable) -> QPushButton:
-        btn: QPushButton = QPushButton(f"{btn_label}", self, objectName="RootBTN")
+    def _build_button(self, btn_label: str, function: Callable[[], None]) -> QPushButton:
+        btn: QPushButton = QPushButton(f"{btn_label}", self)
+        btn.setObjectName("RootBTN")
         btn.clicked.connect(function)
-        btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         return btn
 
     # --------------------------------------
 
     def _add_buttons(self, sidebar_layout: QVBoxLayout) -> None:
         # ---Add sidebar buttons to the layout with functions
-        buttons_info: list[tuple[Path, str, callable]] = [
+        buttons_info: list[tuple[str, Callable[[], None]]] = [
             ("New Patients", self._do_something),
             ("Schedule Appointment", self._do_something),
             ("Prescriptions", self._do_something),

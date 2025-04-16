@@ -4,6 +4,7 @@ from pathlib import Path
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import (
     QApplication,
+    QDialogButtonBox,
 )
 
 from ui.config.logger_config import logger
@@ -19,6 +20,17 @@ class RootApp(QApplication):
 
         self.working_area = None  # ---Window to stack sub windows
 
+    def check_setup(self) -> bool:
+        from ui.config.paths import SETUP_DB
+
+        return SETUP_DB.exists()
+
+    def run_setup(self) -> bool:
+        from ui.setup_page import SetupPage
+
+        setup_dialog = SetupPage()
+        return setup_dialog.exec() == QDialogButtonBox.StandardButton.Ok
+
     # --------------------------------------------------------
     # --Apply css styles
     # --------------------------------------------------------
@@ -32,12 +44,18 @@ class RootApp(QApplication):
     #    def _load_secondary_windows(self) -> None:
 
     def _boot_app(self) -> None:
+
+        # ---Apply stylesheet early so that widgets render properly
+        self.setStyleSheet(self._load_stylesheet(STYLES))
+
+        if not self.check_setup() and not self.run_setup():
+            sys.exit(0)
+
         self.working_area = WorkingArea()
 
         main_window = MainWindow(self)
 
-        # ---Apply stylesheet early so that widgets render properly
-        self.setStyleSheet(self._load_stylesheet(STYLES))
+
 
         # ---Delay showing the main window until after guide_window is fully displayed.
         QTimer.singleShot(10, main_window.show)
