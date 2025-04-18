@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ui.config.paths import SETUP_DB
+from ui.config.paths import CORE_DB
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +31,11 @@ class MainWindow(QMainWindow):
         self.setObjectName("MainWindow")
 
         company_name = "Healthcare App"
-        if SETUP_DB.exists():
+        if CORE_DB.exists():
             try:
-                conn = sqlite3.connect(SETUP_DB)
+                conn = sqlite3.connect(CORE_DB)
                 cursor = conn.cursor()
-                cursor.execute("SELECT company_name FROM settings LIMIT 1")
+                cursor.execute("SELECT CompanyName FROM Company LIMIT 1")
                 row = cursor.fetchone()
                 if row and row[0]:
                     company_name = row[0]

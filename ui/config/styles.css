@@ -7,7 +7,6 @@ QDialog#SetupDialog {
     background-color: white;
     color: #2C3E50;
     border-radius: 5px;
-
 }
 QDialogButtonBox#SetupBTN QPushButton {
     padding: 10px 20px;
@@ -98,6 +97,7 @@ QLineEdit#LineEdit {
     border-radius: 5px;
     padding: 10px;
     font-size: 24px;
+    width: 500px;
 }
 
 QLineEdit:focus {

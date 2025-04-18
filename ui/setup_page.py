@@ -1,9 +1,10 @@
-import sqlite3
-
 import simplematch as sm
-from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QVBoxLayout
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QInputDialog, QLineEdit, QMessageBox, QVBoxLayout
 
-from ui.config.paths import SETUP_DB
+from ui.config.logger_config import logger
+from ui.database.write_to_db import write_to_database
+from ui.util.resize_window import size_and_center_window
 
 
 class SetupPage(QDialog):
@@ -12,8 +13,10 @@ class SetupPage(QDialog):
         self.setWindowTitle("Initial Setup")
         self.setModal(True)
         self.setObjectName("SetupDialog")
+        size_and_center_window(self, 0.40, 0.35)
 
-        self.main_layout = QVBoxLayout(self)
+        main_layout = QVBoxLayout(self)
+        main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         form_layout = QFormLayout()
         self.company_name_input = QLineEdit(self)
@@ -32,13 +35,13 @@ class SetupPage(QDialog):
         self.company_phone_input.setObjectName("LineEdit")
         form_layout.addRow("Company Phone:  ", self.company_phone_input)
 
-        self.main_layout.addLayout(form_layout)
+        main_layout.addLayout(form_layout)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.button_box.setObjectName("SetupBTN")
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
-        self.main_layout.addWidget(self.button_box)
+        main_layout.addWidget(self.button_box)
 
     def accept(self) -> None:
         company_name = self.company_name_input.text().strip()
@@ -94,27 +97,133 @@ class SetupPage(QDialog):
             return
 
         try:
-            SETUP_DB.parent.mkdir(parents=True, exist_ok=True)
-            conn = sqlite3.connect(str(SETUP_DB))
-            cursor = conn.cursor()
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS settings (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    company_name TEXT,
-                    company_address TEXT,
-                    company_email TEXT,
-                    company_phone TEXT
-                );
-            """)
-            cursor.execute("DELETE FROM settings")
-            cursor.execute(
-                "INSERT INTO settings (company_name, company_address, company_email, company_phone) VALUES (?, ?, ?, ?)",
-                (company_name, company_address, company_email, company_phone),
-            )
-            conn.commit()
-            conn.close()
+            company_data = {
+                "CompanyName": company_name,
+                "CompanyAddress": company_address,
+                "CompanyEmail": company_email,
+                "CompanyPhone": company_phone,
+            }
+            success = write_to_database("core", "Company", company_data)
+            if not success:
+                QMessageBox.critical(self, "Error", "Failed to save company info to database.")
+                return
         except Exception as e:
-            print(f"Error saving setup configuration to SQLite: {e}")
+            logger.error(f"Error saving setup configuration to SQLite: {e}")
             return
 
         super().accept()
+
+
+class AdminSetupDialog(QDialog):
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Admin User Setup")
+        self.setModal(True)
+        self.setSizeGripEnabled(True)
+        self.setObjectName("SetupDialog")
+        size_and_center_window(self, 0.40, 0.35)
+
+        form_layout = QFormLayout()
+
+        self.username = QLineEdit(self)
+        self.username.setObjectName("LineEdit")
+        self.email = QLineEdit(self)
+        self.email.setObjectName("LineEdit")
+        self.password = QLineEdit(self)
+        self.password.setObjectName("LineEdit")
+
+        self.password.setEchoMode(QLineEdit.EchoMode.Password)
+        form_layout.addRow("Admin Username:", self.username)
+        form_layout.addRow("Admin Email:", self.email)
+        form_layout.addRow("Admin Password:", self.password)
+
+        main_layout = QVBoxLayout(self)
+        main_layout.addLayout(form_layout)
+
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        self.button_box.setObjectName("SetupBTN")
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+
+        main_layout.addWidget(self.button_box)
+
+    def get_data(self) -> tuple[str, str, str]:
+        username = self.username.text().strip()
+        email = self.email.text().strip()
+        password = self.password.text().strip()
+
+        if not username:
+            QMessageBox.warning(self, "Input Error", "Username is required.")
+            return "", "", ""
+        if not email:
+            QMessageBox.warning(self, "Input Error", "Email is required.")
+            return "", "", ""
+        if not password:
+            QMessageBox.warning(self, "Input Error", "Password is required.")
+            return "", "", ""
+
+        admin_data = {
+            "UserName": username,
+            "UserEmail": email,
+            "UserPosition": "Admin",
+            "UserPrivilegeLevel": "Admin",
+        }
+        write_to_database("core", "Users", admin_data)
+        return username, email, password
+
+
+class LoginDialog(QDialog):
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Login")
+        self.setModal(True)
+        self.setObjectName("SetupDialog")
+        size_and_center_window(self, 0.30, 0.25)
+
+        form_layout = QFormLayout(self)
+        self.username = QLineEdit(self)
+        self.username.setObjectName("LineEdit")
+        self.password = QLineEdit(self)
+        self.password.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password.setObjectName("LineEdit")
+        form_layout.addRow("Username:", self.username)
+        form_layout.addRow("Password:", self.password)
+
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        self.button_box.setObjectName("SetupBTN")
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+
+        layout = QVBoxLayout(self)
+        layout.addLayout(form_layout)
+        layout.addWidget(self.button_box)
+
+    def get_credentials(self) -> tuple[str, str]:
+        username = self.username.text().strip()
+        password = self.password.text().strip()
+
+        if not username or not password:
+            QMessageBox.warning(self, "Input Error", "Both username and password are required.")
+            return "", ""
+
+        return username, password
+
+    def open_new_user_dialog(self) -> None:
+        username, ok1 = QInputDialog.getText(self, "New User", "Enter Username:")
+        if not ok1 or not username.strip():
+            return
+        email, ok2 = QInputDialog.getText(self, "New User", "Enter Email:")
+        if not ok2 or not email.strip():
+            return
+        password, ok3 = QInputDialog.getText(self, "New User", "Enter Password:", QLineEdit.EchoMode.Password)
+        if not ok3 or not password.strip():
+            return
+
+        user_data = {
+            "UserName": username.strip(),
+            "UserEmail": email.strip(),
+            "UserPosition": "Staff",
+            "UserPrivilegeLevel": "User",
+        }
+
+        write_to_database("core", "Users", user_data)
