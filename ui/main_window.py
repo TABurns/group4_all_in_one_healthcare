@@ -1,5 +1,4 @@
 import logging
-import sqlite3
 from collections.abc import Callable
 
 from PySide6.QtGui import QBrush, QPalette, QPixmap
@@ -14,35 +13,30 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ui.config.paths import CORE_DB
-
 logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, root: QApplication, parent=None) -> None:  # noqa: ANN001
+    def __init__(self, root: QApplication, company_name: str, user_name: str, parent=None) -> None:  # noqa: ANN001
         super().__init__(parent)
 
         self.root = root  # ---Main Application
+
+        self.company_name = company_name
+        self.user_name = user_name
+
+        # ---Set window title and status bar
+        self.setWindowTitle(self.company_name)
+        sb = self.statusBar()
+        sb.showMessage(f"Logged in as: {self.user_name}")
+        sb.setStyleSheet("color: #3498db; font-weight: bold;")
+
+
 
         # ---Window to display sub windows.
         self.working_area = getattr(self.root, "working_area", QWidget(self))
 
         self.setObjectName("MainWindow")
-
-        company_name = "Healthcare App"
-        if CORE_DB.exists():
-            try:
-                conn = sqlite3.connect(CORE_DB)
-                cursor = conn.cursor()
-                cursor.execute("SELECT CompanyName FROM Company LIMIT 1")
-                row = cursor.fetchone()
-                if row and row[0]:
-                    company_name = row[0]
-                conn.close()
-            except Exception:
-                logger.exception("Error accessing the database")
-        self.setWindowTitle(company_name)
 
         root_widget = QWidget(self)  # ---Main widget to build on
         root_widget.setObjectName("root_widget")

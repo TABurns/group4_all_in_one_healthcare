@@ -1,6 +1,6 @@
 import simplematch as sm
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QInputDialog, QLineEdit, QMessageBox, QVBoxLayout
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QVBoxLayout, QDialog, QLineEdit
 
 from ui.config.logger_config import logger
 from ui.database.write_to_db import write_to_database
@@ -8,7 +8,7 @@ from ui.util.resize_window import size_and_center_window
 
 
 class SetupPage(QDialog):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None) -> None:  # noqa: ANN001
         super().__init__(parent)
         self.setWindowTitle("Initial Setup")
         self.setModal(True)
@@ -115,7 +115,7 @@ class SetupPage(QDialog):
 
 
 class AdminSetupDialog(QDialog):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None) -> None:  # noqa: ANN001
         super().__init__(parent)
         self.setWindowTitle("Admin User Setup")
         self.setModal(True)
@@ -147,29 +147,92 @@ class AdminSetupDialog(QDialog):
 
         main_layout.addWidget(self.button_box)
 
-    def get_data(self) -> tuple[str, str, str]:
+
+    def accept(self) -> None:
         username = self.username.text().strip()
         email = self.email.text().strip()
         password = self.password.text().strip()
 
         if not username:
             QMessageBox.warning(self, "Input Error", "Username is required.")
-            return "", "", ""
+            return
         if not email:
             QMessageBox.warning(self, "Input Error", "Email is required.")
-            return "", "", ""
+            return
         if not password:
             QMessageBox.warning(self, "Input Error", "Password is required.")
-            return "", "", ""
+            return
 
         admin_data = {
             "UserName": username,
             "UserEmail": email,
             "UserPosition": "Admin",
             "UserPrivilegeLevel": "Admin",
+            "UserPassword": password,
         }
         write_to_database("core", "Users", admin_data)
-        return username, email, password
+        super().accept()
+
+
+class NewUserDialog(QDialog):
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("New User Setup")
+        self.setModal(True)
+        self.setObjectName("SetupDialog")
+        size_and_center_window(self, 0.30, 0.35)
+
+        form_layout = QFormLayout()
+        self.username = QLineEdit(self)
+        self.username.setObjectName("LineEdit")
+        self.email = QLineEdit(self)
+        self.email.setObjectName("LineEdit")
+        self.password = QLineEdit(self)
+        self.password.setObjectName("LineEdit")
+        self.password.setEchoMode(QLineEdit.EchoMode.Password)
+
+        form_layout.addRow("Username:", self.username)
+        form_layout.addRow("Email:", self.email)
+        form_layout.addRow("Password:", self.password)
+
+        main_layout = QVBoxLayout(self)
+        main_layout.addLayout(form_layout)
+
+        self.button_box = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        self.button_box.setObjectName("SetupBTN")
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        main_layout.addWidget(self.button_box)
+
+    def accept(self) -> tuple[str, str]:
+        username = self.username.text().strip()
+        email = self.email.text().strip()
+        password = self.password.text().strip()
+
+        if not username:
+            QMessageBox.warning(self, "Input Error", "Username is required.")
+            return "", ""
+        if not email:
+            QMessageBox.warning(self, "Input Error", "Email is required.")
+            return "", ""
+        if not password:
+            QMessageBox.warning(self, "Input Error", "Password is required.")
+            return "", ""
+
+        user_data = {
+            "UserName": username,
+            "UserEmail": email,
+            "UserPosition": "Staff",
+            "UserPrivilegeLevel": "User",
+            "UserPassword": password,
+        }
+        write_to_database("core", "Users", user_data)
+        super().accept()
+
+        QMessageBox.information(self, "New User", "New User added successfully, continue to login.", QMessageBox.StandardButton.Close)
+        return username, password
 
 
 class LoginDialog(QDialog):
@@ -180,7 +243,8 @@ class LoginDialog(QDialog):
         self.setObjectName("SetupDialog")
         size_and_center_window(self, 0.30, 0.25)
 
-        form_layout = QFormLayout(self)
+        form_layout = QFormLayout()
+
         self.username = QLineEdit(self)
         self.username.setObjectName("LineEdit")
         self.password = QLineEdit(self)
@@ -189,14 +253,18 @@ class LoginDialog(QDialog):
         form_layout.addRow("Username:", self.username)
         form_layout.addRow("Password:", self.password)
 
+        main_layout = QVBoxLayout(self)
+        main_layout.addLayout(form_layout)
+
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.button_box.setObjectName("SetupBTN")
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
+        main_layout.addWidget(self.button_box)
 
-        layout = QVBoxLayout(self)
-        layout.addLayout(form_layout)
-        layout.addWidget(self.button_box)
+        # ---Add New User button
+        new_user_button = self.button_box.addButton("New User", QDialogButtonBox.ButtonRole.ActionRole)
+        new_user_button.clicked.connect(self.open_new_user_dialog)
 
     def get_credentials(self) -> tuple[str, str]:
         username = self.username.text().strip()
@@ -205,25 +273,9 @@ class LoginDialog(QDialog):
         if not username or not password:
             QMessageBox.warning(self, "Input Error", "Both username and password are required.")
             return "", ""
-
         return username, password
 
     def open_new_user_dialog(self) -> None:
-        username, ok1 = QInputDialog.getText(self, "New User", "Enter Username:")
-        if not ok1 or not username.strip():
-            return
-        email, ok2 = QInputDialog.getText(self, "New User", "Enter Email:")
-        if not ok2 or not email.strip():
-            return
-        password, ok3 = QInputDialog.getText(self, "New User", "Enter Password:", QLineEdit.EchoMode.Password)
-        if not ok3 or not password.strip():
-            return
-
-        user_data = {
-            "UserName": username.strip(),
-            "UserEmail": email.strip(),
-            "UserPosition": "Staff",
-            "UserPrivilegeLevel": "User",
-        }
-
-        write_to_database("core", "Users", user_data)
+        from ui.setup_page import NewUserDialog
+        dialog = NewUserDialog(self)
+        dialog.exec()

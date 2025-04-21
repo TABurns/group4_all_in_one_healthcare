@@ -20,7 +20,8 @@ def init_databases() -> None:
                 UserName TEXT,
                 UserEmail TEXT,
                 UserPosition TEXT,
-                UserPrivilegeLevel TEXT
+                UserPrivilegeLevel TEXT,
+                UserPassword TEXT
             );
         """)
 

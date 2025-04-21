@@ -64,6 +64,7 @@ class RootApp(QApplication):
         setup_status = self.check_setup()
 
         if setup_status == "company":
+            QMessageBox.information(self.activeWindow(), "Setup", "Starting Software Configuration", QMessageBox.StandardButton.Ok)  # type: ignore
             if not self.run_setup():
                 sys.exit(0)
             setup_status = self.check_setup()
@@ -79,13 +80,18 @@ class RootApp(QApplication):
                 sys.exit(0)
             conn = sqlite3.connect(str(CORE_DB))
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM Users WHERE UserName=? AND Password=?", (username, password))
+            cursor.execute("SELECT * FROM Users WHERE UserName=? AND UserPassword=?", (username, password))
             if not cursor.fetchone():
-                QMessageBox.warning(self.activeWindow(), "Login Failed", "Invalid UserName or Password.") # type: ignore
+                QMessageBox.warning(self.activeWindow(), "Login Failed", "Invalid UserName or Password.")  # type: ignore
                 sys.exit(0)
 
+            # Fetch company name for title
+            cursor.execute("SELECT CompanyName FROM Company LIMIT 1")
+            company_row = cursor.fetchone()
+            company_name = company_row[0] if company_row and company_row[0] else "Healthcare App"
+
         self.working_area = WorkingArea()
-        main_window = MainWindow(self)
+        main_window = MainWindow(self, company_name, username)
         QTimer.singleShot(10, main_window.show)
         size_and_center_window(main_window, 0.85, 0.75)
         self.processEvents()
