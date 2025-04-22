@@ -1,6 +1,6 @@
 import simplematch as sm
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QVBoxLayout, QDialog, QLineEdit
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QVBoxLayout
 
 from ui.config.logger_config import logger
 from ui.database.write_to_db import write_to_database
@@ -11,7 +11,6 @@ class SetupPage(QDialog):
     def __init__(self, parent=None) -> None:  # noqa: ANN001
         super().__init__(parent)
         self.setWindowTitle("Initial Setup")
-        self.setModal(True)
         self.setObjectName("SetupDialog")
         size_and_center_window(self, 0.40, 0.35)
 
@@ -57,7 +56,6 @@ class SetupPage(QDialog):
             QMessageBox.warning(self, "Input Error", "Company Address is required.")
             return
 
-        company_email = self.company_email_input.text().strip()
         if not company_email:
             QMessageBox.warning(self, "Input Error", "Company email is required.")
             return
@@ -147,7 +145,6 @@ class AdminSetupDialog(QDialog):
 
         main_layout.addWidget(self.button_box)
 
-
     def accept(self) -> None:
         username = self.username.text().strip()
         email = self.email.text().strip()
@@ -199,7 +196,7 @@ class NewUserDialog(QDialog):
         main_layout.addLayout(form_layout)
 
         self.button_box = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
         )
         self.button_box.setObjectName("SetupBTN")
         self.button_box.accepted.connect(self.accept)
@@ -277,5 +274,6 @@ class LoginDialog(QDialog):
 
     def open_new_user_dialog(self) -> None:
         from ui.setup_page import NewUserDialog
+
         dialog = NewUserDialog(self)
         dialog.exec()

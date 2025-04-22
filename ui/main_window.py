@@ -1,4 +1,3 @@
-import logging
 from collections.abc import Callable
 
 from PySide6.QtGui import QBrush, QPalette, QPixmap
@@ -13,7 +12,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-logger = logging.getLogger(__name__)
+from ui.new_patients import NewPatientWindow
+from ui.working_area import WorkingArea
 
 
 class MainWindow(QMainWindow):
@@ -21,6 +21,7 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
 
         self.root = root  # ---Main Application
+        self.working_area = WorkingArea(self)
 
         self.company_name = company_name
         self.user_name = user_name
@@ -31,11 +32,7 @@ class MainWindow(QMainWindow):
         sb.showMessage(f"Logged in as: {self.user_name}")
         sb.setStyleSheet("color: #3498db; font-weight: bold;")
 
-
-
         # ---Window to display sub windows.
-        self.working_area = getattr(self.root, "working_area", QWidget(self))
-
         self.setObjectName("MainWindow")
 
         root_widget = QWidget(self)  # ---Main widget to build on
@@ -44,7 +41,7 @@ class MainWindow(QMainWindow):
         main_layout = QHBoxLayout(root_widget)
         self.setCentralWidget(root_widget)
 
-        # Set the background image programmatically
+        # ---Set the background image
         pixmap = QPixmap("ui/resources/gooddr.png")
         palette = self.palette()
         palette.setBrush(QPalette.ColorRole.Window, QBrush(pixmap))
@@ -85,7 +82,7 @@ class MainWindow(QMainWindow):
     def _add_buttons(self, sidebar_layout: QVBoxLayout) -> None:
         # ---Add sidebar buttons to the layout with functions
         buttons_info: list[tuple[str, Callable[[], None]]] = [
-            ("New Patients", self._do_something),
+            ("New Patients", self._open_new_patient_portal),
             ("Schedule Appointment", self._do_something),
             ("Prescriptions", self._do_something),
         ]
@@ -95,3 +92,8 @@ class MainWindow(QMainWindow):
 
     def _do_something(self) -> None:
         print("btn clicked...")
+
+    def _open_new_patient_portal(self) -> None:
+        self.new_patients_window = NewPatientWindow(self)
+        self.working_area.addWidget(self.new_patients_window)
+        self.working_area.setCurrentWidget(self.new_patients_window)

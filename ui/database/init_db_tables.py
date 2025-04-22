@@ -33,7 +33,7 @@ def init_databases() -> None:
                 PatientId TEXT,
                 PatientName TEXT,
                 DOB TEXT,
-                ContactNumber TEXT,
+                PhoneNumber TEXT,
                 PatientEmail TEXT
             );
         """)

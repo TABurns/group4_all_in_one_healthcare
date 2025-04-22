@@ -7,7 +7,7 @@ from loguru import logger
 
 from ui.config.paths import LOG_FILE
 
-logger.remove()
+#logger.remove()
 
 
 if getattr(sys, "frozen", False):
