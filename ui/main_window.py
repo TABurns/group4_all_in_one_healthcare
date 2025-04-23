@@ -13,6 +13,8 @@ from PySide6.QtWidgets import (
 )
 
 from ui.new_patients import NewPatientWindow
+from ui.update_providers import UpdateProvidersWindow
+from ui.visit_details import VisitDetailsWindow
 from ui.working_area import WorkingArea
 
 
@@ -82,9 +84,10 @@ class MainWindow(QMainWindow):
     def _add_buttons(self, sidebar_layout: QVBoxLayout) -> None:
         # ---Add sidebar buttons to the layout with functions
         buttons_info: list[tuple[str, Callable[[], None]]] = [
-            ("New Patients", self._open_new_patient_portal),
-            ("Schedule Appointment", self._do_something),
-            ("Prescriptions", self._do_something),
+            ("Patient Onboarding", self._open_new_patient_portal),
+            ("Add Visit Details", self._open_add_visit_details),
+            ("Reports", self._do_something),
+            ("Update Providers", self._open_update_providers),
         ]
 
         for btn_label, function in buttons_info:
@@ -97,3 +100,14 @@ class MainWindow(QMainWindow):
         self.new_patients_window = NewPatientWindow(self)
         self.working_area.addWidget(self.new_patients_window)
         self.working_area.setCurrentWidget(self.new_patients_window)
+
+    def _open_add_visit_details(self) -> None:
+        self.add_visit_details = VisitDetailsWindow(self)
+        self.working_area.addWidget(self.add_visit_details)
+        self.working_area.setCurrentWidget(self.add_visit_details)
+
+
+    def _open_update_providers(self) -> None:
+        self.update_providers = UpdateProvidersWindow(self)
+        self.working_area.addWidget(self.update_providers)
+        self.working_area.setCurrentWidget(self.update_providers)

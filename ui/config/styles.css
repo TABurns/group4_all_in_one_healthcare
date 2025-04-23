@@ -1,106 +1,82 @@
 /* ---------------------------------------------------------
-@Setup Page
-----------------------------------------------------------*/
-QDialog#SetupDialog {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: larger;
-    background-color: white;
-    color: #2C3E50;
-    border-radius: 5px;
-}
-QDialogButtonBox#SetupBTN QPushButton {
-    padding: 10px 20px;
-    font-size: 18px;
-    font-weight: 600;
-    border: 2px solid #2C3E50;
-    background-color: #ecf0f1;
-    color: #2C3E50;
-    border-radius: 4px;
-}
-
-QDialogButtonBox#SetupBTN QPushButton:hover {
-    background-color: #d0d3d4;
-    border-color: #2980b9;
-    color: #2980b9;
-}
-
-QDialogButtonBox#SetupBTN QPushButton:pressed {
-    background-color: #bdc3c7;
-    border-color: #2471a3;
-    color: #1c2833;
-}
-
-QDialog#SetupDialog QLabel {
-    color: #2C3E50;
-    font-size: 24px;
-}
-
-QPushButton#SetupBTN:hover {
-    padding-left: 17px;
-    /* Increased left padding on hover */
-}
-
-QDialog#SetupDialog QLineEdit:focus {
-    border: 1px solid #3498db;
-    background-color: #ffffff;
-    color: #2C3E50;
-}
-
-/* ---------------------------------------------------------
-@New Patient Page
-----------------------------------------------------------*/
-QWidget#NewPatient {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: larger;
-    background-color: white;
-    color: #2C3E50;
-    border-radius: 5px;
-}
-
-QWidgetButtonBox#SetupBTN QPushButton {
-    padding: 10px 20px;
-    font-size: 18px;
-    font-weight: 600;
-    border: 2px solid #2C3E50;
-    background-color: #ecf0f1;
-    color: #2C3E50;
-    border-radius: 4px;
-}
-
-QWidgetButtonBox#SetupBTN QPushButton:hover {
-    background-color: #d0d3d4;
-    border-color: #2980b9;
-    color: #2980b9;
-}
-
-QWidgetButtonBox#SetupBTN QPushButton:pressed {
-    background-color: #bdc3c7;
-    border-color: #2471a3;
-    color: #1c2833;
-}
-
-QWidget#NewPatient QLabel {
-    color: #2C3E50;
-    font-size: 24px;
-}
-
-QPushButton#NewPatientBTN:hover {
-    padding-left: 17px;
-    /* Increased left padding on hover */
-}
-
-QWidget#NewPatient QLineEdit:focus {
-    border: 1px solid #3498db;
-    background-color: #ffffff;
-    color: #2C3E50;
-}
-
-/* ---------------------------------------------------------
 @MAIN WINDOW
 ---------------------------------------------------------*/
 QMainWindow#MainWindow {
     font-family: Arial, Helvetica, sans-serif;
 
+}
+
+/* ---------------------------------------------------------
+@Dialog Standardization
+----------------------------------------------------------*/
+QDialog#SubWindow {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: larger;
+    background-color: #ffffff;
+    color: #2C3E50;
+    border-radius: 8px;
+    border: 1.5px solid #BDC3C7;
+    padding: 24px;
+    min-width: 420px;
+}
+
+QDialog#SubWindow QLabel {
+    color: #2C3E50;
+    font-size: 22px;
+    font-weight: 600;
+    padding-bottom: 8px;
+}
+
+QDialog#SubWindow QComboBox,
+QDialog#SubWindow QDateEdit,
+QDialog#SubWindow QTextEdit,
+QDialog#SubWindow QLineEdit {
+    background-color: #ecf0f1;
+    color: #2C3E50;
+    border: 1px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 18px;
+}
+
+QDialog#SubWindow QComboBox:focus,
+QDialog#SubWindow QDateEdit:focus,
+QDialog#SubWindow QTextEdit:focus,
+QDialog#SubWindow QLineEdit:focus {
+    border: 1.5px solid #3498db;
+    background-color: #ffffff;
+}
+
+QDialog#SubWindow QComboBox QAbstractItemView {
+    background-color: #ffffff;
+    color: #2C3E50;
+    background-color: #d0d3d4;
+    color: #2C3E50;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+QDialog#SubWindow QPushButton {
+    padding: 10px 24px;
+    font-size: 18px;
+    font-weight: 600;
+    border: 2px solid #2C3E50;
+    background-color: #ecf0f1;
+    color: #2C3E50;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+QDialog#SubWindow QPushButton:hover {
+    background-color: #d0d3d4;
+    border-color: #2980b9;
+    color: #2980b9;
+}
+
+QDialog#SubWindow QPushButton:pressed {
+    background-color: #bdc3c7;
+    border-color: #2471a3;
+    color: #1c2833;
 }
 
 /* ---------------------------------------------------------
@@ -122,7 +98,7 @@ QLabel#Footer {
 ----------------------------------------------------------*/
 QPushButton#RootBTN {
     padding: 20px 10px;
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 700;
     color: #2C3E50;
     text-align: left;
@@ -131,25 +107,143 @@ QPushButton#RootBTN {
 }
 
 QPushButton#RootBTN:hover {
-    padding-left: 17px;
+    padding-left: 10px;
     /* Increased left padding on hover */
 }
 
 /* ---------------------------------------------------------
-@Line Edits
+@SubWindows
 ----------------------------------------------------------*/
 
-QLineEdit#LineEdit {
-    background-color: gray;
+QWidget#SubWindow {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: larger;
+    background-color: white;
+    color: #2C3E50;
+    border-radius: 5px;
+}
+
+QWidget#SubWindow QComboBox {
+    background-color: #ecf0f1;
     color: #2C3E50;
     border: 1px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 18px;
+}
+
+QWidget#SubWindow QComboBox ::drop-down {
+    border-left: 1px solid #BDC3C7;
+    width: 30px;
+    background-color: #d0d3d4;
+}
+
+QWidget#SubWindow QComboBox :hover {
+    border: 1px solid #2980b9;
+}
+
+
+QWidget#SubWindow QComboBox :focus {
+    border: 1px solid #3498db;
+    background-color: #ffffff;
+}
+
+QWidget#SubWindow QComboBox QAbstractItemView {
+    background-color: #d0d3d4;
+    color: #2C3E50;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+/* QDateEdit */
+QWidget#SubWindow QDateEdit {
+    background-color: #ecf0f1;
+    color: #2C3E50;
+    border: 1px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 18px;
+}
+
+QWidget#SubWindow QDateEdit ::drop-down {
+    border-left: 1px solid #BDC3C7;
+    width: 30px;
+    background-color: #d0d3d4;
+}
+
+QWidget#SubWindow QDateEdit :hover {
+    border: 1px solid #2980b9;
+}
+
+QWidget#SubWindow QDateEdit :focus {
+    border: 1px solid #3498db;
+    background-color: #ffffff;
+}
+
+/* QTextEdit */
+QWidget#SubWindow QTextEdit {
+    background-color: #ffffff;
+    color: #2C3E50;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 18px;
+}
+
+QWidget#SubWindow QTextEdit :focus {
+    border: 1px solid #3498db;
+    background-color: #ffffff;
+}
+
+QWidgetButtonBox#SubWindow QPushButton {
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    border: 2px solid #2C3E50;
+    background-color: #ecf0f1;
+    color: #2C3E50;
+    border-radius: 4px;
+}
+
+QWidgetButtonBox#SubWindow QPushButton:hover {
+    background-color: #d0d3d4;
+    border-color: #2980b9;
+    color: #2980b9;
+}
+
+QWidgetButtonBox#SubWindow QPushButton:pressed {
+    background-color: #bdc3c7;
+    border-color: #2471a3;
+    color: #1c2833;
+}
+
+QWidget#SubWindow QLabel {
+    color: #2C3E50;
+    font-size: 24px;
+}
+
+QPushButton#SubWindowBTN:hover {
+    padding-left: 17px;
+    /* Increased left padding on hover */
+}
+
+QWidget#SubWindow QLineEdit:focus {
+    border: 1px solid #3498db;
+    background-color: #ffffff;
+    color: #2C3E50;
+}
+
+QWidget#SubWindow QLineEdit {
+    border: 1px solid #3498db;
+    background-color: #ffffff;
+    color: #2C3E50;
     border-radius: 5px;
     padding: 10px;
     font-size: 24px;
     width: 500px;
 }
 
-QLineEdit:focus {
+QWidget#SubWindow QLineEdit:focus {
     border: 1px solid #3498db;
     background-color: #ffffff;
     color: #2c3e50;

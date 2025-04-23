@@ -11,7 +11,7 @@ class SetupPage(QDialog):
     def __init__(self, parent=None) -> None:  # noqa: ANN001
         super().__init__(parent)
         self.setWindowTitle("Initial Setup")
-        self.setObjectName("SetupDialog")
+        self.setObjectName("SubWindow")
         size_and_center_window(self, 0.40, 0.35)
 
         main_layout = QVBoxLayout(self)
@@ -19,19 +19,15 @@ class SetupPage(QDialog):
 
         form_layout = QFormLayout()
         self.company_name_input = QLineEdit(self)
-        self.company_name_input.setObjectName("LineEdit")
         form_layout.addRow("Company Name:  ", self.company_name_input)
 
         self.company_address_input = QLineEdit(self, placeholderText="601 College St, Clarksville, TN 37044")
-        self.company_address_input.setObjectName("LineEdit")
         form_layout.addRow("Company Address:  ", self.company_address_input)
 
         self.company_email_input = QLineEdit(self, placeholderText="company@yahoo.com")
-        self.company_email_input.setObjectName("LineEdit")
         form_layout.addRow("Company Email:  ", self.company_email_input)
 
         self.company_phone_input = QLineEdit(self, placeholderText="(###) ###-####")
-        self.company_phone_input.setObjectName("LineEdit")
         form_layout.addRow("Company Phone:  ", self.company_phone_input)
 
         main_layout.addLayout(form_layout)
@@ -118,17 +114,14 @@ class AdminSetupDialog(QDialog):
         self.setWindowTitle("Admin User Setup")
         self.setModal(True)
         self.setSizeGripEnabled(True)
-        self.setObjectName("SetupDialog")
+        self.setObjectName("SubWindow")
         size_and_center_window(self, 0.40, 0.35)
 
         form_layout = QFormLayout()
 
         self.username = QLineEdit(self)
-        self.username.setObjectName("LineEdit")
         self.email = QLineEdit(self)
-        self.email.setObjectName("LineEdit")
         self.password = QLineEdit(self)
-        self.password.setObjectName("LineEdit")
 
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
         form_layout.addRow("Admin Username:", self.username)
@@ -176,16 +169,13 @@ class NewUserDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("New User Setup")
         self.setModal(True)
-        self.setObjectName("SetupDialog")
+        self.setObjectName("SubWindow")
         size_and_center_window(self, 0.30, 0.35)
 
         form_layout = QFormLayout()
         self.username = QLineEdit(self)
-        self.username.setObjectName("LineEdit")
         self.email = QLineEdit(self)
-        self.email.setObjectName("LineEdit")
         self.password = QLineEdit(self)
-        self.password.setObjectName("LineEdit")
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
 
         form_layout.addRow("Username:", self.username)
@@ -237,16 +227,14 @@ class LoginDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Login")
         self.setModal(True)
-        self.setObjectName("SetupDialog")
+        self.setObjectName("SubWindow")
         size_and_center_window(self, 0.30, 0.25)
 
         form_layout = QFormLayout()
 
         self.username = QLineEdit(self)
-        self.username.setObjectName("LineEdit")
         self.password = QLineEdit(self)
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
-        self.password.setObjectName("LineEdit")
         form_layout.addRow("Username:", self.username)
         form_layout.addRow("Password:", self.password)
 
