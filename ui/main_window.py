@@ -13,10 +13,11 @@ from PySide6.QtWidgets import (
 )
 
 from ui.new_patients import NewPatientWindow
+from ui.reports_window import ReportsWindow
+from ui.schedule_window import Schedule
 from ui.update_providers import UpdateProvidersWindow
 from ui.visit_details import VisitDetailsWindow
 from ui.working_area import WorkingArea
-from ui.reports_window import ReportsWindow
 
 
 class MainWindow(QMainWindow):
@@ -87,6 +88,7 @@ class MainWindow(QMainWindow):
         buttons_info: list[tuple[str, Callable[[], None]]] = [
             ("Patient Onboarding", self._open_new_patient_portal),
             ("Add Visit Details", self._open_add_visit_details),
+            ("Schedule", self._open_schedule_window),
             ("Reports", self._open_reports_window),
             ("Update Providers", self._open_update_providers),
         ]
@@ -107,11 +109,15 @@ class MainWindow(QMainWindow):
         self.working_area.addWidget(self.add_visit_details)
         self.working_area.setCurrentWidget(self.add_visit_details)
 
+    def _open_schedule_window(self) -> None:
+        self.schedule = Schedule(self)
+        self.working_area.addWidget(self.schedule)
+        self.working_area.setCurrentWidget(self.schedule)
+
     def _open_reports_window(self) -> None:
         self.reports = ReportsWindow(self)
         self.working_area.addWidget(self.reports)
         self.working_area.setCurrentWidget(self.reports)
-
 
     def _open_update_providers(self) -> None:
         self.update_providers = UpdateProvidersWindow(self)

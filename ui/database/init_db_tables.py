@@ -64,6 +64,15 @@ def init_databases() -> None:
                 MessageId TEXT
             );
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS Schedule (
+                ScheduleId TEXT,
+                ProviderId TEXT,
+                PatientId TEXT,
+                ScheduleDate TEXT,
+                ScheduleSlot INTEGER
+            );
+        """)
 
     # --- Billing and Schedule
     with sqlite3.connect(BILLING_DB) as conn:
@@ -74,14 +83,5 @@ def init_databases() -> None:
                 VisitId TEXT,
                 DueDate TEXT,
                 Paid INTEGER
-            );
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS Schedule (
-                ScheduleId TEXT,
-                ProviderId TEXT,
-                PatientId TEXT,
-                ScheduleDate TEXT,
-                ScheduleSlot INTEGER
             );
         """)

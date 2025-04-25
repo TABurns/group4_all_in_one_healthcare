@@ -85,11 +85,11 @@ class UpdateProvidersWindow(QWidget):
         except ValueError:
             QMessageBox.warning(self, "Input Error", "Provider Rate must be a number.")
             return
-        try:
+        """try:
             max_visits = int(max_visits_text)
         except ValueError:
             QMessageBox.warning(self, "Input Error", "Max Visits Per Day must be an integer.")
-            return
+            return"""
 
         # ---Validation
         if not provider_name:
@@ -105,7 +105,7 @@ class UpdateProvidersWindow(QWidget):
             "ProviderName": provider_name,
             # "UserId": user_id,
             "ProviderRate": provider_rate,
-            "MaxVisitsPerDay": max_visits,
+            # "MaxVisitsPerDay": max_visits,
         }
 
         # ---Insert provider details into the database

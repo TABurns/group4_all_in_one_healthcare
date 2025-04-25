@@ -1,3 +1,4 @@
+import platform
 import sqlite3
 import sys
 from pathlib import Path
@@ -54,7 +55,7 @@ class RootApp(QApplication):
             logger.error(f"Failed to load stylesheet from {path}: {err}")
             return ""
 
-    def _boot_app(self) -> None:
+    def boot_app(self) -> None:
         init_databases()
         self.setStyleSheet(self._load_stylesheet(STYLES))
 
@@ -99,4 +100,8 @@ class RootApp(QApplication):
 
 if __name__ == "__main__":
     app = RootApp()
-    app._boot_app()
+
+    if platform.system() == "Windows":
+        app.setStyle("Fusion")
+
+    app.boot_app()

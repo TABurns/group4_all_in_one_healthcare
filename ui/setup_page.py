@@ -232,11 +232,11 @@ class LoginDialog(QDialog):
 
         form_layout = QFormLayout()
 
-        self.username = QLineEdit(self)
-        self.password = QLineEdit(self)
+        self.username = QLineEdit(self, placeholderText='User Name:')
+        self.password = QLineEdit(self, placeholderText='Password:')
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
-        form_layout.addRow("Username:", self.username)
-        form_layout.addRow("Password:", self.password)
+        form_layout.addRow("Username: ", self.username)
+        form_layout.addRow("Password: ", self.password)
 
         main_layout = QVBoxLayout(self)
         main_layout.addLayout(form_layout)

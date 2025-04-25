@@ -9,6 +9,7 @@ QMainWindow#MainWindow {
 QMessageBox {
     background-color: white;
     min-width: 600px;
+    color: #2C3E50;
 }
 
 /* ---------------------------------------------------------
@@ -129,7 +130,8 @@ QWidget#SubWindow {
     border-radius: 5px;
 }
 
-QWidget#SubWindow QComboBox {
+QWidget#SubWindow QComboBox,
+QWidget#SubWindow QSpinBox {
     background-color: #ecf0f1;
     color: #2C3E50;
     border: 1px solid #BDC3C7;
@@ -257,13 +259,13 @@ QWidget#SubWindow QLineEdit:focus {
 
 QWidget#SubWindow QPushButton {
     padding: 10px 20px;
-    font-size: 18px;
+    font-size: 12px;
     font-weight: 600;
     border: 2px solid #2C3E50;
     background-color: #ecf0f1;
     color: #2C3E50;
     border-radius: 4px;
-    max-width: 150px;
+    max-width: 100px;
 }
 
 QWidget#SubWindow QPushButton:hover {
