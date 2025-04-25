@@ -43,8 +43,8 @@ class UpdateProvidersWindow(QWidget):
         form_layout.addRow("Provider Rate:", self.provider_rate_input)
 
         # ---Max Visits Per Day
-        self.max_visits_input = QLineEdit(self)
-        form_layout.addRow("Max Visits Per Day:", self.max_visits_input)
+        """self.max_visits_input = QLineEdit(self)
+        form_layout.addRow("Max Visits Per Day:", self.max_visits_input)"""
 
         container_layout.addLayout(form_layout)
 
@@ -73,13 +73,13 @@ class UpdateProvidersWindow(QWidget):
 
         # ---Rate and Max Visits validation
         rate_text = self.provider_rate_input.text().strip()
-        max_visits_text = self.max_visits_input.text().strip()
+        # max_visits_text = self.max_visits_input.text().strip()
         if not rate_text:
             QMessageBox.warning(self, "Input Error", "Provider Rate is required.")
             return
-        if not max_visits_text:
+        """if not max_visits_text:
             QMessageBox.warning(self, "Input Error", "Max Visits Per Day is required.")
-            return
+            return"""
         try:
             provider_rate = float(rate_text)
         except ValueError:
