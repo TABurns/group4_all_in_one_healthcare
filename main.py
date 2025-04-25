@@ -61,7 +61,7 @@ class RootApp(QApplication):
         setup_status = self._check_setup()
 
         if setup_status == "company":
-            QMessageBox.information(self.activeWindow(), "Setup", "Starting Software Configuration", QMessageBox.StandardButton.Ok)  # type: ignore
+            QMessageBox.information(None, "Setup", "Starting Software Configuration", QMessageBox.StandardButton.Ok)  # type: ignore
             if not self._run_setup():
                 sys.exit(0)
             setup_status = self._check_setup()
@@ -80,7 +80,7 @@ class RootApp(QApplication):
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM Users WHERE UserName=? AND UserPassword=?", (username, password))
             if not cursor.fetchone():
-                QMessageBox.warning(self.activeWindow(), "Login Failed", "Invalid UserName or Password.")  # type: ignore
+                QMessageBox.warning(None, "Login Failed", "Invalid UserName or Password.")  # type: ignore
                 sys.exit(0)
 
             # ---Fetch company name for title

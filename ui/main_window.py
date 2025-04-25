@@ -16,6 +16,7 @@ from ui.new_patients import NewPatientWindow
 from ui.update_providers import UpdateProvidersWindow
 from ui.visit_details import VisitDetailsWindow
 from ui.working_area import WorkingArea
+from ui.reports_window import ReportsWindow
 
 
 class MainWindow(QMainWindow):
@@ -86,7 +87,7 @@ class MainWindow(QMainWindow):
         buttons_info: list[tuple[str, Callable[[], None]]] = [
             ("Patient Onboarding", self._open_new_patient_portal),
             ("Add Visit Details", self._open_add_visit_details),
-            ("Reports", self._do_something),
+            ("Reports", self._open_reports_window),
             ("Update Providers", self._open_update_providers),
         ]
 
@@ -105,6 +106,11 @@ class MainWindow(QMainWindow):
         self.add_visit_details = VisitDetailsWindow(self)
         self.working_area.addWidget(self.add_visit_details)
         self.working_area.setCurrentWidget(self.add_visit_details)
+
+    def _open_reports_window(self) -> None:
+        self.reports = ReportsWindow(self)
+        self.working_area.addWidget(self.reports)
+        self.working_area.setCurrentWidget(self.reports)
 
 
     def _open_update_providers(self) -> None:

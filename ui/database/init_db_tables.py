@@ -29,7 +29,7 @@ def init_databases() -> None:
     with sqlite3.connect(PATIENT_DB) as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS Patient (
+            CREATE TABLE IF NOT EXISTS Patients (
                 PatientId TEXT,
                 PatientName TEXT,
                 DOB TEXT,
@@ -41,7 +41,6 @@ def init_databases() -> None:
             CREATE TABLE IF NOT EXISTS Provider (
                 ProviderId TEXT,
                 ProviderName TEXT,
-                UserId TEXT,
                 ProviderRate REAL,
                 MaxVisitsPerDay INTEGER
             );
@@ -51,6 +50,8 @@ def init_databases() -> None:
                 PatientId TEXT,
                 ProviderId TEXT,
                 VisitDate TEXT,
+                VisitNotes TEXT,
+                FollowUpDetails TEXT,
                 BillId TEXT
             );
         """)

@@ -6,6 +6,11 @@ QMainWindow#MainWindow {
 
 }
 
+QMessageBox {
+    background-color: white;
+    min-width: 600px;
+}
+
 /* ---------------------------------------------------------
 @Dialog Standardization
 ----------------------------------------------------------*/
@@ -19,6 +24,7 @@ QDialog#SubWindow {
     padding: 24px;
     min-width: 420px;
 }
+
 
 QDialog#SubWindow QLabel {
     color: #2C3E50;
@@ -247,4 +253,61 @@ QWidget#SubWindow QLineEdit:focus {
     border: 1px solid #3498db;
     background-color: #ffffff;
     color: #2c3e50;
+}
+
+QWidget#SubWindow QPushButton {
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    border: 2px solid #2C3E50;
+    background-color: #ecf0f1;
+    color: #2C3E50;
+    border-radius: 4px;
+    max-width: 150px;
+}
+
+QWidget#SubWindow QPushButton:hover {
+    background-color: #d0d3d4;
+    border-color: #2980b9;
+    color: #2980b9;
+}
+
+QWidget#SubWindow QPushButton:pressed {
+    background-color: #bdc3c7;
+    border-color: #2471a3;
+    color: #1c2833;
+}
+
+/* ---------------------------------------------------------
+@Table Styling
+---------------------------------------------------------*/
+
+QWidget#SubWindow QTableWidget {
+    background-color: #ffffff;
+    color: #2C3E50;
+    border: 1px solid #BDC3C7;
+    border-collapse: separate;
+    font-size: 14px;
+}
+
+QWidget#SubWindow QTableWidget::item:selected {
+        background-color: #3498db;
+        color: #ffffff;
+}
+
+/* Selection styling for items */
+QWidget#SubWindow QTableWidget::item:selected {
+    background-color: #3498db;
+    color: #ffffff;
+}
+
+/* Header section styling */
+QWidget#SubWindow QHeaderView::section {
+    background-color: #ecf0f1;
+    font-size: 20px;
+    color: #2C3E50;
+    font-weight: 600;
+    padding: 8px;
+    height: 30px;
+    border: 1px solid #BDC3C7;
 }

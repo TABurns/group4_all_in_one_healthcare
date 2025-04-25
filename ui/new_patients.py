@@ -53,7 +53,7 @@ class NewPatientWindow(QWidget):
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.button_box.accepted.connect(self.accept)
         # self.button_box.rejected.connect(self.reject)
-        container_layout.addWidget(self.button_box)
+        container_layout.addWidget(self.button_box, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         main_layout.addWidget(container)
 
@@ -124,7 +124,7 @@ class NewPatientWindow(QWidget):
         try:
             with sqlite3.connect(PATIENT_DB) as conn:
                 cursor = conn.cursor()
-            patient_count = cursor.execute("SELECT COUNT(*) FROM Patient").fetchone()[0]
+            patient_count = cursor.execute("SELECT COUNT(*) FROM Patients").fetchone()[0]
 
             patient_id = patient_count + 1
 
@@ -136,11 +136,12 @@ class NewPatientWindow(QWidget):
                 "PatientEmail": email,
             }
 
-            success = write_to_database("patients", "Patient", patient_data)
+            success = write_to_database("patients", "Patients", patient_data)
             if not success:
                 QMessageBox.critical(self, "Error", "Failed to save company info to database.")
                 return
 
+            QMessageBox.information(self, "Success", "Patient Added.", QMessageBox.StandardButton.Ok)
             self._clear_inputs()
 
         except Exception as e:

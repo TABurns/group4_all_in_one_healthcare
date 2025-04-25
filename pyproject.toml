@@ -8,4 +8,5 @@ dependencies = [
     "loguru>=0.7.3",
     "pyside6>=6.8.2.1",
     "simplematch>=1.4",
+    "tzlocal>=5.3.1",
 ]

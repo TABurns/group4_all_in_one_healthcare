@@ -1,13 +1,17 @@
 import sqlite3
+from datetime import timedelta
 
 from PySide6.QtCore import QDate, Qt
 from PySide6.QtWidgets import QCheckBox, QComboBox, QDateEdit, QGridLayout, QLabel, QMessageBox, QPushButton, QTextEdit, QVBoxLayout, QWidget
+from tzlocal import get_localzone
 
-from ui.config.paths import PATIENT_DB
+from ui.config.paths import BILLING_DB, PATIENT_DB
 from ui.database.write_to_db import write_to_database
 
 
 class VisitDetailsWindow(QWidget):
+    TZ = get_localzone()
+
     def __init__(self, parent=None) -> None:  # noqa: ANN001
         super().__init__(parent)
         self.setWindowTitle("Add Visit Details")
@@ -66,7 +70,7 @@ class VisitDetailsWindow(QWidget):
                 cursor = conn.cursor()
 
                 # ---Load patients
-                cursor.execute("SELECT PatientName FROM Patient")
+                cursor.execute("SELECT PatientName FROM Patients")
                 patients = cursor.fetchall()
                 self.patient_combo.addItem("Select a patient")
                 for patient in patients:
@@ -83,7 +87,7 @@ class VisitDetailsWindow(QWidget):
             QMessageBox.critical(self, "Database Error", f"Failed to load data: {e}")
 
     def add_visit_details(self) -> None:
-        # Retrieve data from the form
+        # ---Retrieve data from the form
         patient_name = self.patient_combo.currentText()
         provider_name = self.provider_combo.currentText()
         visit_date = self.visit_date_edit.date().toString("yyyy-MM-dd")
@@ -91,7 +95,7 @@ class VisitDetailsWindow(QWidget):
         follow_up = self.follow_up_edit.toPlainText().strip()
         send_bill = self.send_bill_checkbox.isChecked()
 
-        # Basic validation
+        # ---Basic validation
         if patient_name == "Select a patient":
             QMessageBox.warning(self, "Input Error", "Please select a patient.")
             return
@@ -99,19 +103,55 @@ class VisitDetailsWindow(QWidget):
             QMessageBox.warning(self, "Input Error", "Please select a provider.")
             return
 
-        # Prepare data for database insertion
+        # --- Lookup patient and provider IDs
+        conn = sqlite3.connect(PATIENT_DB)
+        cursor = conn.cursor()
+        cursor.execute("SELECT PatientId FROM Patients WHERE PatientName = ?", (patient_name,))
+        patient_row = cursor.fetchone()
+        cursor.execute("SELECT ProviderId FROM Provider WHERE ProviderName = ?", (provider_name,))
+        provider_row = cursor.fetchone()
+        conn.close()
+
+        patient_id = patient_row[0] if patient_row else ""
+        provider_id = provider_row[0] if provider_row else ""
+
+        # --- Generate BillId
+        conn_bill = sqlite3.connect(BILLING_DB)
+        cur_bill = conn_bill.cursor()
+        cur_bill.execute("SELECT COUNT(*) FROM Billing;")
+        bill_count = cur_bill.fetchone()[0] or 0
+        bill_id = str(bill_count + 1)
+        conn_bill.close()
+
+        # ---Prepare data for database insertion
         visit_data = {
-            "PatientName": patient_name,
-            "ProviderName": provider_name,
+            "PatientId": patient_id,
+            "ProviderId": provider_id,
             "VisitDate": visit_date,
             "VisitNotes": visit_notes,
-            "FollowUp": follow_up,
-            "SendBill": int(send_bill),
+            "FollowUpDetails": follow_up,
+            "BillId": bill_id,
         }
 
-        # Insert visit details into the database
+        # ---Insert visit details into the database
         success = write_to_database("patients", "VisitDetails", visit_data)
         if success:
+            # --- Insert billing entry if Send Bill checked
+            if send_bill:
+                try:
+                    conn_b = sqlite3.connect(BILLING_DB)
+                    cur_b = conn_b.cursor()
+                    import datetime
+
+                    due_date = (datetime.datetime.now(tz=self.TZ).date() + timedelta(days=30)).isoformat()
+                    # ----Use bill_id for both BillId and VisitId
+                    cur_b.execute(
+                        "INSERT INTO Billing (BillId, VisitId, DueDate, Paid) VALUES (?, ?, ?, 0)",
+                        (bill_id, bill_id, due_date),
+                    )
+                    conn_b.commit()
+                finally:
+                    conn_b.close()
             QMessageBox.information(self, "Success", "Visit details added successfully.", QMessageBox.StandardButton.Ok)
             self._clear_form()
         else:
