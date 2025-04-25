@@ -74,12 +74,13 @@ def init_databases() -> None:
             );
         """)
 
-    # --- Billing and Schedule
+    # --- Billing
     with sqlite3.connect(BILLING_DB) as conn:
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS Billing (
                 BillId TEXT,
+                BillAmount FLOAT,
                 VisitId TEXT,
                 DueDate TEXT,
                 Paid INTEGER

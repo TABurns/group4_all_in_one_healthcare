@@ -1,8 +1,6 @@
-import sqlite3
 import csv
-import os
+import sqlite3
 from pathlib import Path
-from PySide6.QtWidgets import QPushButton, QMessageBox
 
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -10,6 +8,8 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QLabel,
+    QMessageBox,
+    QPushButton,
     QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
@@ -17,47 +17,44 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ui.config.paths import PATIENT_DB
+from ui.config.paths import BILLING_DB, PATIENT_DB
 
 
 class ReportsWindow(QWidget):
+
+    COLS = [  # noqa: RUF012
+        "Visit Date",
+        "Provider Name",
+        "Visit Notes",
+        "Follow Up",
+        "Bill ID",
+        "Amount",
+        "Due Date",
+        "Paid",
+    ]
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setObjectName("SubWindow")
 
-        # --- Main vertical layout
         main_layout = QVBoxLayout(self)
 
-        # --- Patient dropdown row
         dropdown_container = QHBoxLayout()
         self.patient_combo = QComboBox(self)
         dropdown_container.addWidget(QLabel("Select Patient:"))
         dropdown_container.addWidget(self.patient_combo)
-
-        # ---Add dropdown row to main layout
         main_layout.addLayout(dropdown_container)
 
-        # --- Visits table
         self.visits_table = QTableWidget(self)
-        self.visits_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
+        self.visits_table.setSelectionMode(QAbstractItemView.NoSelection)
         self.visits_table.verticalHeader().setVisible(False)
-        self.visits_table.setColumnCount(5)
-        self.visits_table.setHorizontalHeaderLabels(
-            [
-                "Visit Date",
-                "Provider Name",
-                "Visit Notes",
-                "Follow Up",
-                "Bill ID",
-            ],
-        )
-        self.visits_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        header = self.visits_table.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.visits_table.setColumnCount(len(self.COLS))
+        self.visits_table.setHorizontalHeaderLabels(self.COLS)
+        self.visits_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.visits_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.visits_table.setAlternatingRowColors(True)
         main_layout.addWidget(self.visits_table)
 
-        # --- Export button
         self.export_button = QPushButton("Export", self)
         self.export_button.setObjectName("ExportButton")
         self.export_button.clicked.connect(self._export_csv)
@@ -65,75 +62,60 @@ class ReportsWindow(QWidget):
 
         main_layout.setStretch(1, 1)
 
-        # ---Reload visits whenever a new patient is selected
         self.patient_combo.currentIndexChanged.connect(self._load_visits)
 
-        # ---Load patients (and initial visits)
         self._load_patients()
 
     def _load_patients(self) -> None:
-        try:
-            conn = sqlite3.connect(PATIENT_DB)
-            cursor = conn.cursor()
-            cursor.execute("SELECT PatientName FROM Patients;")
-            names = [row[0] for row in cursor.fetchall()]
-        finally:
-            conn.close()
-        self.patient_combo.clear()
-        self.patient_combo.addItems(names)
-        # ---Load the visits for the first (or currently selected) patient
+        with sqlite3.connect(PATIENT_DB) as conn:
+            cur = conn.execute("SELECT PatientId, PatientName FROM Patients")
+            self.patient_combo.clear()
+            for pid, name in cur.fetchall():
+                self.patient_combo.addItem(name, pid)
         self._load_visits()
 
     def _load_visits(self) -> None:
-        # ---Fetch selected patient's ID
-        patient_name = self.patient_combo.currentText()
-        conn = sqlite3.connect(PATIENT_DB)
-        cursor = conn.cursor()
-        cursor.execute("SELECT PatientId FROM Patients WHERE PatientName = ?", (patient_name,))
-        row = cursor.fetchone()
-        patient_id = row[0] if row else ""
-        # ---Query visit details joined with provider name
-        cursor.execute(
-            """
-            SELECT vd.VisitDate, p.ProviderName, vd.VisitNotes, vd.FollowUpDetails, vd.BillId
-            FROM VisitDetails vd
-            LEFT JOIN Provider p ON vd.ProviderId = p.ProviderId
-            WHERE vd.PatientId = ?
-            ORDER BY vd.VisitDate ASC
-        """,
-            (patient_id,),
-        )
-        visits = cursor.fetchall()
-        conn.close()
+        patient_id = self.patient_combo.currentData()
+        if patient_id is None:
+            return
 
-        # ---Populate table
-        self.visits_table.setRowCount(len(visits))
-        for i, (visit_date, prov_name, notes, follow_up, bill_id) in enumerate(visits):
-            for j, value in enumerate((visit_date, prov_name, notes, follow_up, bill_id)):
-                item = QTableWidgetItem(str(value))
-                self.visits_table.setItem(i, j, item)
+        billing_path = str(BILLING_DB)
+        with sqlite3.connect(PATIENT_DB) as conn:
+            conn.execute(f"ATTACH DATABASE '{billing_path}' AS billing;")
+            query = """
+                SELECT vd.VisitDate,
+                       p.ProviderName,
+                       vd.VisitNotes,
+                       vd.FollowUpDetails,
+                       vd.BillId,
+                       b.BillAmount,
+                       b.DueDate,
+                       CASE b.Paid WHEN 1 THEN 'Yes' ELSE 'No' END
+                FROM VisitDetails vd
+                LEFT JOIN Provider p ON vd.ProviderId = p.ProviderId
+                LEFT JOIN billing.Billing b ON vd.BillId = b.BillId
+                WHERE vd.PatientId = ?
+                ORDER BY vd.VisitDate ASC;
+                """
+            rows = conn.execute(query, (patient_id,)).fetchall()
+            conn.execute("DETACH DATABASE billing;")
+
+        self.visits_table.setRowCount(len(rows))
+        for r, row in enumerate(rows):
+            for c, value in enumerate(row):
+                self.visits_table.setItem(r, c, QTableWidgetItem(str(value)))
 
     def _export_csv(self) -> None:
         patient_name = self.patient_combo.currentText()
-        desktop: Path = Path.home() / "Desktop"
-        filename = f"{patient_name}.csv"
-        path: Path = desktop / filename
-        row_count = self.visits_table.rowCount()
-        col_count = self.visits_table.columnCount()
-        headers = []
-        for col in range(col_count):
-            header_item = self.visits_table.horizontalHeaderItem(col)
-            headers.append(header_item.text() if header_item else "")
+        path = Path.home() / "Desktop" / f"{patient_name}.csv"
         try:
             with path.open("w", newline="", encoding="utf-8") as csvfile:
                 writer = csv.writer(csvfile)
-                writer.writerow(headers)
-                for row in range(row_count):
-                    row_data = []
-                    for col in range(col_count):
-                        item = self.visits_table.item(row, col)
-                        row_data.append(item.text() if item else "")
-                    writer.writerow(row_data)
-            QMessageBox.information(self, "Export Successful", f"Exported to:\n{path}", QMessageBox.StandardButton.Ok)
-        except Exception as e:
-            QMessageBox.critical(self, "Export Failed", f"Could not export CSV:\n{e}")
+                writer.writerow(self.COLS)
+                for r in range(self.visits_table.rowCount()):
+                    writer.writerow([
+                        self.visits_table.item(r, c).text() if self.visits_table.item(r, c) else "" for c in range(self.visits_table.columnCount())
+                    ])
+            QMessageBox.information(self, "Export Successful", f"Exported to:\n{path}")
+        except Exception as exc:
+            QMessageBox.critical(self, "Export Failed", f"Could not export CSV:\n{exc}")

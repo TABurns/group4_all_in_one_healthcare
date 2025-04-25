@@ -289,12 +289,11 @@ QWidget#SubWindow QTableWidget {
     color: #2C3E50;
     border: 1px solid #BDC3C7;
     border-collapse: separate;
-    font-size: 14px;
 }
 
 QWidget#SubWindow QTableWidget::item:selected {
-        background-color: #3498db;
-        color: #ffffff;
+    background-color: #3498db;
+    color: #ffffff;
 }
 
 /* Selection styling for items */
