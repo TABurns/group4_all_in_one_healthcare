@@ -127,7 +127,8 @@ class Schedule(QWidget):
             self.slot_combo.addItem(label, h)
             idx = self.slot_combo.count() - 1
             if h in bookings:
-                self.slot_combo.model().item(idx).setEnabled(False)
+                index = self.slot_combo.model().index(idx, 0)
+                self.slot_combo.model().setData(index, False, Qt.ItemDataRole.AccessibleTextRole)
         self.slot_combo.blockSignals(False)
 
         self.day_grid.setRowCount(len(self.HOURS))

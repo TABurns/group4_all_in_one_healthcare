@@ -44,6 +44,7 @@ QDialog#SubWindow QLineEdit {
     border-radius: 4px;
     padding: 8px;
     font-size: 18px;
+
 }
 
 QDialog#SubWindow QComboBox:focus,
@@ -61,6 +62,7 @@ QDialog#SubWindow QComboBox QAbstractItemView {
     color: #2C3E50;
     border: 1px solid #ccc;
     outline: none;
+    min-width: 100px;
 }
 
 QDialog#SubWindow QPushButton {
@@ -138,11 +140,12 @@ QWidget#SubWindow QSpinBox {
     border-radius: 4px;
     padding: 8px;
     font-size: 18px;
+    min-width: 150px;
 }
+
 
 QWidget#SubWindow QComboBox ::drop-down {
     border-left: 1px solid #BDC3C7;
-    width: 30px;
     background-color: #d0d3d4;
 }
 
@@ -175,7 +178,6 @@ QWidget#SubWindow QDateEdit {
 
 QWidget#SubWindow QDateEdit ::drop-down {
     border-left: 1px solid #BDC3C7;
-    width: 30px;
     background-color: #d0d3d4;
 }
 

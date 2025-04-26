@@ -61,7 +61,7 @@ def init_databases() -> None:
                 PatientId TEXT,
                 BillId TEXT,
                 NotificationDate TEXT,
-                MessageId TEXT
+                Message TEXT
             );
         """)
         cursor.execute("""

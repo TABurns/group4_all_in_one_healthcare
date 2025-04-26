@@ -46,12 +46,12 @@ class ReportsWindow(QWidget):
         main_layout.addLayout(dropdown_container)
 
         self.visits_table = QTableWidget(self)
-        self.visits_table.setSelectionMode(QAbstractItemView.NoSelection)
+        self.visits_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self.visits_table.verticalHeader().setVisible(False)
         self.visits_table.setColumnCount(len(self.COLS))
         self.visits_table.setHorizontalHeaderLabels(self.COLS)
-        self.visits_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.visits_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.visits_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.visits_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.visits_table.setAlternatingRowColors(True)
         main_layout.addWidget(self.visits_table)
 
@@ -84,13 +84,13 @@ class ReportsWindow(QWidget):
             conn.execute(f"ATTACH DATABASE '{billing_path}' AS billing;")
             query = """
                 SELECT vd.VisitDate,
-                       p.ProviderName,
-                       vd.VisitNotes,
-                       vd.FollowUpDetails,
-                       vd.BillId,
-                       b.BillAmount,
-                       b.DueDate,
-                       CASE b.Paid WHEN 1 THEN 'Yes' ELSE 'No' END
+                    p.ProviderName,
+                    vd.VisitNotes,
+                    vd.FollowUpDetails,
+                    vd.BillId,
+                    b.BillAmount,
+                    b.DueDate,
+                    CASE b.Paid WHEN 1 THEN 'Yes' ELSE 'No' END
                 FROM VisitDetails vd
                 LEFT JOIN Provider p ON vd.ProviderId = p.ProviderId
                 LEFT JOIN billing.Billing b ON vd.BillId = b.BillId
@@ -113,9 +113,11 @@ class ReportsWindow(QWidget):
                 writer = csv.writer(csvfile)
                 writer.writerow(self.COLS)
                 for r in range(self.visits_table.rowCount()):
-                    writer.writerow([
-                        self.visits_table.item(r, c).text() if self.visits_table.item(r, c) else "" for c in range(self.visits_table.columnCount())
-                    ])
+                    row_data = []
+                    for c in range(self.visits_table.columnCount()):
+                        item = self.visits_table.item(r, c)
+                        row_data.append(item.text() if item is not None else "")
+                    writer.writerow(row_data)
             QMessageBox.information(self, "Export Successful", f"Exported to:\n{path}")
         except Exception as exc:
             QMessageBox.critical(self, "Export Failed", f"Could not export CSV:\n{exc}")
