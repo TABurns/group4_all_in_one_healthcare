@@ -1,3 +1,9 @@
+import os
+
+# ---Additional imports for admin authentication
+import sqlite3
+from pathlib import Path
+
 import simplematch as sm
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QVBoxLayout
@@ -5,6 +11,33 @@ from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit,
 from ui.config.logger_config import logger
 from ui.database.write_to_db import write_to_database
 from ui.util.resize_window import size_and_center_window
+
+
+def verify_admin_credentials(username: str, password: str) -> bool:
+
+    db_path = Path.cwd() / "core.sqlite"
+    if not db_path.exists():
+        logger.error("Core database not found at %s", db_path)
+        return False
+
+    try:
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cur = conn.execute(
+                """
+                SELECT 1
+                FROM   Users
+                WHERE  UserName = ?
+                  AND  UserPassword = ?
+                  AND  UserPrivilegeLevel = 'Admin'
+                LIMIT 1;
+                """,
+                (username, password),
+            )
+            return cur.fetchone() is not None
+    except sqlite3.Error as exc:
+        logger.error("SQLite error while validating admin credentials: %s", exc)
+        return False
 
 
 class SetupPage(QDialog):
@@ -165,7 +198,7 @@ class AdminSetupDialog(QDialog):
 
 
 class NewUserDialog(QDialog):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None) -> None:  # noqa: ANN001
         super().__init__(parent)
         self.setWindowTitle("New User Setup")
         self.setModal(True)
@@ -223,7 +256,7 @@ class NewUserDialog(QDialog):
 
 
 class LoginDialog(QDialog):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None) -> None:  # noqa: ANN001
         super().__init__(parent)
         self.setWindowTitle("Login")
         self.setModal(True)
@@ -232,8 +265,8 @@ class LoginDialog(QDialog):
 
         form_layout = QFormLayout()
 
-        self.username = QLineEdit(self, placeholderText='User Name:')
-        self.password = QLineEdit(self, placeholderText='Password:')
+        self.username = QLineEdit(self, placeholderText="User Name:")
+        self.password = QLineEdit(self, placeholderText="Password:")
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
         form_layout.addRow("Username: ", self.username)
         form_layout.addRow("Password: ", self.password)
@@ -261,7 +294,49 @@ class LoginDialog(QDialog):
         return username, password
 
     def open_new_user_dialog(self) -> None:
-        from ui.setup_page import NewUserDialog
+        auth_dialog = AdminAuthDialog(self)
+        if auth_dialog.exec() != QDialog.DialogCode.Accepted:
+            return  # admin cancelled or failed authentication
 
+        # ---If admin auth proceed to new-user workflow
         dialog = NewUserDialog(self)
         dialog.exec()
+
+
+class AdminAuthDialog(QDialog):
+    def __init__(self, parent=None) -> None:  # noqa: ANN001
+        super().__init__(parent)
+        self.setWindowTitle("Admin Authentication Required")
+        self.setModal(True)
+        self.setObjectName("SubWindow")
+        size_and_center_window(self, 0.30, 0.25)
+
+        form_layout = QFormLayout(self)
+        self.username = QLineEdit(self, placeholderText="Admin username")
+        self.password = QLineEdit(self, placeholderText="Password")
+        self.password.setEchoMode(QLineEdit.EchoMode.Password)
+
+        form_layout.addRow("Username:", self.username)
+        form_layout.addRow("Password:", self.password)
+
+        self.button_box = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
+            parent=self,
+        )
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        form_layout.addRow(self.button_box)
+
+    def get_credentials(self) -> tuple[str, str]:
+        """Return the current text in the username / password fields."""
+        return self.username.text().strip(), self.password.text().strip()
+
+    def accept(self) -> None:
+        username, password = self.get_credentials()
+        if not username or not password:
+            QMessageBox.warning(self, "Missing Input", "Both username and password are required.")
+            return
+        if not verify_admin_credentials(username, password):
+            QMessageBox.critical(self, "Authentication Failed", "Invalid admin credentials.")
+            return
+        super().accept()

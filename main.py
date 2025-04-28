@@ -73,22 +73,39 @@ class RootApp(QApplication):
             setup_status = self._check_setup()
 
         if setup_status == "login":
-            success, username, password = self._run_login()
-            if not success:
-                logger.error("login unsuccessful, exiting.")
-                sys.exit(0)
-            conn = sqlite3.connect(CORE_DB)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM Users WHERE UserName=? AND UserPassword=?", (username, password))
-            if not cursor.fetchone():
-                QMessageBox.warning(None, "Login Failed", "Invalid UserName or Password.")  # type: ignore
-                sys.exit(0)
+            while True:
+                success, username, password = self._run_login()
 
-            # ---Fetch company name for title
-            cursor.execute("SELECT CompanyName FROM Company LIMIT 1")
-            company_row = cursor.fetchone()
-            company_name = company_row[0] if company_row and company_row[0] else "Smart Healthcare Systems"
-            self.processEvents()
+                if not success:
+                    logger.info("Login dialog cancelled by user; exiting.")
+                    sys.exit(0)
+
+                # Validate credentials
+                with sqlite3.connect(CORE_DB) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        "SELECT * FROM Users WHERE UserName=? AND UserPassword=?",
+                        (username, password),
+                    )
+                    row = cursor.fetchone()
+
+                if row:
+                    break
+
+                QMessageBox.warning(
+                    None,
+                    "Login Failed",
+                    "Invalid username or password. Please try again.",
+                )
+
+            with sqlite3.connect(CORE_DB) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT CompanyName FROM Company LIMIT 1")
+                company_row = cursor.fetchone()
+                company_name = (
+                    company_row[0] if company_row and company_row[0] else "Smart Healthcare Systems"
+                )
+                self.processEvents()
 
         self.main_window = MainWindow(self, company_name, username)
         size_and_center_window(self.main_window, 0.85, 0.75)
@@ -100,8 +117,5 @@ class RootApp(QApplication):
 
 if __name__ == "__main__":
     app = RootApp()
-
-    if platform.system() == "Windows":
-        app.setStyle("Fusion")
-
+    app.setStyle("Fusion")
     app.boot_app()

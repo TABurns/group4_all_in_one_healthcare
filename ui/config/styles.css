@@ -7,9 +7,7 @@ QMainWindow#MainWindow {
 }
 
 QMessageBox {
-    background-color: white;
     min-width: 600px;
-    color: #2C3E50;
 }
 
 /* ---------------------------------------------------------
