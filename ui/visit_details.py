@@ -161,6 +161,8 @@ class VisitDetailsWindow(QWidget):
                 "INSERT INTO Billing (BillId, VisitId, BillAmount, DueDate, Paid) VALUES (?, ?, ?, ?, 0)",
                 (bill_id, bill_id, amount_due, due_date),
             )
+            conn_b.commit()
+            conn_b.close()
 
 
             # ---Read company name from core DB

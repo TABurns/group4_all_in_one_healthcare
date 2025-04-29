@@ -34,6 +34,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(self.company_name)
         sb = self.statusBar()
         sb.showMessage(f"Logged in as: {self.user_name}")
+        sb.setStyleSheet("color: #3498db; font-weight: bold;")
 
         # ---Window to display sub windows.
         self.setObjectName("MainWindow")
