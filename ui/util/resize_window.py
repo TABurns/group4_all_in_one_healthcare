@@ -5,14 +5,18 @@
 
 from __future__ import annotations
 
+from PySide6.QtCore import QPoint
 from PySide6.QtWidgets import QApplication, QWidget
 
 
 def size_and_center_window(window: QWidget, width_percent: float, height_percent: float) -> None:
-    # ---Center Window on Screen
-    screen = QApplication.primaryScreen().size()
-    window.setGeometry(0, 0, int(screen.width() * width_percent), int(screen.height() * height_percent))
+    screen_geo = QApplication.primaryScreen().availableGeometry()
 
-    window.move(
-        QApplication.primaryScreen().availableGeometry().center() - window.rect().center(),
-    )
+    new_w = int(screen_geo.width() * width_percent)
+    new_h = int(screen_geo.height() * height_percent)
+    window.resize(new_w, new_h)
+
+    left_margin = int(screen_geo.width() * 0.05)
+    x = screen_geo.left() + left_margin
+    y = screen_geo.top() + (screen_geo.height() - new_h) // 2
+    window.move(QPoint(x, y))

@@ -34,7 +34,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(self.company_name)
         sb = self.statusBar()
         sb.showMessage(f"Logged in as: {self.user_name}")
-        sb.setStyleSheet("color: #3498db; font-weight: bold;")
 
         # ---Window to display sub windows.
         self.setObjectName("MainWindow")
@@ -53,7 +52,7 @@ class MainWindow(QMainWindow):
 
         # ---Widget for sidebar btns.
         sidebar_widget: QWidget = QWidget(self)
-        sidebar_widget.setObjectName("SideBarWidget")
+        sidebar_widget.setObjectName("SideBar")
         sidebar_layout: QVBoxLayout = QVBoxLayout(sidebar_widget)
 
         # ---Add sub window btns to sidebar

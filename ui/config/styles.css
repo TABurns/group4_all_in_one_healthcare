@@ -90,7 +90,7 @@ QDialog#SubWindow QPushButton:pressed {
 @Sidebar
 ----------------------------------------------------------*/
 
-QWidget#SideBarWidget {
+QWidget#SideBar {
     background-color: white;
     color: #2C3E50;
     border-radius: 5px;
@@ -104,6 +104,7 @@ QLabel#Footer {
 @RootBTN
 ----------------------------------------------------------*/
 QPushButton#RootBTN {
+    background-color: white;
     padding: 20px 10px;
     font-size: 18px;
     font-weight: 700;

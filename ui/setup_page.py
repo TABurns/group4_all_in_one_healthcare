@@ -1,35 +1,27 @@
-import os
-
 # ---Additional imports for admin authentication
 import sqlite3
-from pathlib import Path
 
 import simplematch as sm
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QVBoxLayout
 
 from ui.config.logger_config import logger
+from ui.config.paths import CORE_DB
 from ui.database.write_to_db import write_to_database
 from ui.util.resize_window import size_and_center_window
 
 
 def verify_admin_credentials(username: str, password: str) -> bool:
-
-    db_path = Path.cwd() / "core.sqlite"
-    if not db_path.exists():
-        logger.error("Core database not found at %s", db_path)
-        return False
-
     try:
-        with sqlite3.connect(db_path) as conn:
+        with sqlite3.connect(CORE_DB) as conn:
             conn.row_factory = sqlite3.Row
             cur = conn.execute(
                 """
                 SELECT 1
                 FROM   Users
                 WHERE  UserName = ?
-                  AND  UserPassword = ?
-                  AND  UserPrivilegeLevel = 'Admin'
+                AND  UserPassword = ?
+                AND  UserPrivilegeLevel = 'Admin'
                 LIMIT 1;
                 """,
                 (username, password),
